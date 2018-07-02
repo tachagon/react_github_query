@@ -1,17 +1,197 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import InputBar from './InputBar';
+import GithubInfo from './GithubInfo';
 
 class App extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      usernameInput: '',
+      displayUserInfo: false,
+      errorMessage: '',
+      userInfo: {
+        login: '',
+        avatar_url: '',
+        bio: '',
+        followers: [
+          {
+            id: '',
+            login: '',
+            avatar_url: '',
+            repos: [
+              {
+                id: '',
+                name: '',
+              },
+            ],
+          },
+        ],
+      },
+    };
+  }
+
+  handleChange(event) {
+    this.setState({usernameInput: event.target.value});
+  }
+
+  handleSubmit(event) {
+    // Prevent browser refresh
+    event.preventDefault();
+    this.fetchUserData(this.state.usernameInput);
+    this.setState({usernameInput: ''});
+  }
+
+  handleClick(follower_index) {
+    // Get a follower object
+    const follower = this.state.userInfo.followers[follower_index];
+
+    // If follower is not null
+    if (follower) {
+      // Get login(username) data of follower
+      const {login} = follower;
+      return this.fetchUserData(login);
+    }
+    return null;
+  }
+
+  fetchUserData(username) {
+    fetch('https://api.github.com/users/' + username)
+      .then(response => {
+        if (!response.ok) {
+          // Throw error when respose status is not 200
+          throw Error(response.statusText);
+        } else {
+          // Return response data as json
+          return response.json()
+        }
+      })
+      .then(responseJson => {
+
+        // Get datas that we need from JSON response.
+        const {id, login, avatar_url, bio, followers, followers_url} = responseJson;
+        
+        // Create empty array for stores followers
+        const followersArr = Array(followers).fill(null);
+
+        this.setState({
+          displayUserInfo: true,
+          userInfo: this.resetUserInfo(login, avatar_url, bio, followersArr),
+        });
+
+        // Get user's followers
+        this.fetchUserFollowers(followers_url);
+
+      })
+      .catch(error => {
+        this.setState({
+          displayUserInfo: false,
+          errorMessage: error.message,
+          userInfo: this.resetUserInfo(),
+        });
+      });
+  }
+
+  fetchUserFollowers(followers_url) {
+    fetch(followers_url)
+      .then(response => response.json())
+      .then(responseJson => {
+        // Copy followers array to modify later
+        const followersArr = this.state.userInfo.followers.slice();
+
+        responseJson.forEach((follower, index) => {
+          // Get data from each follower
+          const {id, login, avatar_url, repos_url} = follower;
+          
+          // Add each follower into array
+          followersArr[index] = {
+            id: id,
+            login: login,
+            avatar_url: avatar_url,
+            repos: [],
+          };
+
+          // Get user's repos.
+          this.fetchUserRepos(repos_url, index);
+        });
+        
+        this.setState({
+          userInfo: {
+            ...this.state.userInfo,
+            followers: followersArr,
+          },
+        });
+
+      });
+  }
+
+  fetchUserRepos(repos_url, owner_index) {
+    fetch(repos_url)
+      .then(response => response.json())
+      .then(responseJson => {
+        // Get a follower object follow by owner index
+        const follower = {...this.state.userInfo.followers[owner_index]};
+
+        let repos = [];
+
+        responseJson.forEach((repo) => {
+          // Get repo data from JSON response
+          const {id, name} = repo;
+
+          // Add new object to repos array
+          repos.push({
+            id: id, 
+            name: name
+          });
+        });
+
+        // Create new follower object and change repos array property.
+        const newFollower = {...follower, repos: repos};
+
+        // Get followers array from current state.
+        const followers = this.state.userInfo.followers.slice();
+
+        // Change an old follower data to new follower data
+        // which updated repos array property.
+        followers[owner_index] = newFollower;
+
+        this.setState({
+          userInfo: {
+            ...this.state.userInfo,
+            followers: followers,
+          },
+        });
+      });
+  }
+
+  resetUserInfo(login='', avatar_url='', bio='', followers=[]) {
+    return {
+      ...this.state.userInfo,
+      login: login,
+      avatar_url: avatar_url,
+      bio: bio,
+      followers: followers,
+    };
+  }
+
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+        <InputBar
+          value={this.state.usernameInput}
+          onChange={event => this.handleChange(event)}
+          onSubmit={event => this.handleSubmit(event)} 
+        />
+
+        {this.state.displayUserInfo ? 
+          <GithubInfo 
+            userInfo={this.state.userInfo}
+            onClick={follower_index => this.handleClick(follower_index)} 
+          />
+          :
+          <h1 className='error-message'>{this.state.errorMessage}</h1>
+        }
+        
       </div>
     );
   }

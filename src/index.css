@@ -3,3 +3,19 @@ body {
   padding: 0;
   font-family: sans-serif;
 }
+
+.user-avatar {
+	margin: 32px;
+	width: 100px;
+	height: auto;
+}
+
+.follower-avatar {
+	width: 50px;
+	height: auto;
+}
+
+a {
+	color: blue;
+	cursor: pointer;
+}
