@@ -1,5 +1,25 @@
-body {
+/*body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
+}*/
+
+.follower-avatar {
+	width: auto;
+	height: 50px;
+	margin-right: 16px;
+}
+
+a.blue {
+	color: blue !important;
+	cursor: pointer;
+}
+
+a.black {
+	color: black !important;
+	cursor: pointer;
+}
+
+.center{
+	text-align: center;
 }
