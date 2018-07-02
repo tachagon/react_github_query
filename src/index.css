@@ -1,21 +1,25 @@
-body {
+/*body {
   margin: 0;
   padding: 0;
   font-family: sans-serif;
-}
-
-.user-avatar {
-	margin: 32px;
-	width: 100px;
-	height: auto;
-}
+}*/
 
 .follower-avatar {
-	width: 50px;
-	height: auto;
+	width: auto;
+	height: 50px;
+	margin-right: 16px;
 }
 
-a {
-	color: blue;
+a.blue {
+	color: blue !important;
 	cursor: pointer;
+}
+
+a.black {
+	color: black !important;
+	cursor: pointer;
+}
+
+.center{
+	text-align: center;
 }

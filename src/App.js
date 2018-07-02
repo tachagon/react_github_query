@@ -94,7 +94,9 @@ class App extends Component {
 
   fetchUserFollowers(followers_url) {
     fetch(followers_url)
-      .then(response => response.json())
+      .then(response => {
+        return response.json();
+      })
       .then(responseJson => {
         // Copy followers array to modify later
         const followersArr = this.state.userInfo.followers.slice();
@@ -127,7 +129,9 @@ class App extends Component {
 
   fetchUserRepos(repos_url, owner_index) {
     fetch(repos_url)
-      .then(response => response.json())
+      .then(response => {
+        return response.json();
+      })
       .then(responseJson => {
         // Get a follower object follow by owner index
         const follower = {...this.state.userInfo.followers[owner_index]};
@@ -176,20 +180,29 @@ class App extends Component {
 
   render() {
     return (
-      <div className="App">
-        <InputBar
-          value={this.state.usernameInput}
-          onChange={event => this.handleChange(event)}
-          onSubmit={event => this.handleSubmit(event)} 
-        />
-
+      <div className="container">
+        <div className="row mb-4">
+          <InputBar
+            value={this.state.usernameInput}
+            onChange={event => this.handleChange(event)}
+            onSubmit={event => this.handleSubmit(event)} 
+          />
+        </div>
+        
         {this.state.displayUserInfo ? 
           <GithubInfo 
             userInfo={this.state.userInfo}
             onClick={follower_index => this.handleClick(follower_index)} 
           />
           :
-          <h1 className='error-message'>{this.state.errorMessage}</h1>
+          this.state.errorMessage &&
+            <div className="row">
+              <div className="col">
+                <div className="alert alert-danger" role="alert">
+                  {this.state.errorMessage}
+                </div>
+              </div>
+            </div>
         }
         
       </div>

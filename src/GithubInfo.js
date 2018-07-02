@@ -5,13 +5,13 @@ const Column = (props) => {
     <tr key={props.id}>
       <td>
         <img src={props.avatar_url} className="follower-avatar" />
-        <a hreg="#" onClick={props.onClick} >
+        <a hreg="#" onClick={props.onClick} className="black" >
           {props.login}
         </a>
       </td>
       <td>
         {props.name ?
-          <a hreg="#" onClick={props.onClick} >
+          <a hreg="#" onClick={props.onClick} className="blue" >
             {props.name}
           </a>
           :
@@ -81,17 +81,29 @@ class GithubInfo extends Component {
     const {userInfo} = this.props;
 
     return (
-      <div className="GithubInfo">
-        <img src={userInfo.avatar_url} className="user-avatar" />
-        <h1>Username: {userInfo.login}</h1>
-        <p>Bio:<br/>{userInfo.bio}</p>
+      <div className="row">
+        <div className="col-md-3">
+          <img
+            src={userInfo.avatar_url}
+            className="img-fluid d-block"
+          />
+        </div>
+        <div className="col-md-9">
+          <h1 className="display-1">{userInfo.login}</h1>
+          <p className="lead">Bio:</p>
+          <p>{userInfo.bio}</p>
 
-        {(!userInfo.followers || userInfo.followers.length === 0) ?
-          <h2>No follower.</h2>
-          :
-          this.renderTable(userInfo.followers)
-        }
+          {(!userInfo.followers || userInfo.followers.length === 0) ?
+            <div className="row">
+              <div className="col">
+                <p className="lead">No follower.</p>
+              </div>
+            </div>
+            :
+            this.renderTable(userInfo.followers)
+          }
 
+        </div>
       </div>
     );
   }
