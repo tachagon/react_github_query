@@ -59,7 +59,7 @@ class App extends Component {
     return {
       method: "GET",
       headers: {
-        "Authorization": "token " + this.props.token,
+        "Authorization": "token " + process.env.REACT_APP_GITHUB_TOKEN,
       },
     };
   }
