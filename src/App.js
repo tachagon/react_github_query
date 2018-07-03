@@ -55,8 +55,17 @@ class App extends Component {
     return null;
   }
 
+  requestHeaders() {
+    return {
+      method: "GET",
+      headers: {
+        "Authorization": "token " + this.props.token,
+      },
+    };
+  }
+
   fetchUserData(username) {
-    fetch('https://api.github.com/users/' + username)
+    fetch('https://api.github.com/users/' + username, this.requestHeaders())
       .then(response => {
         if (!response.ok) {
           // Throw error when respose status is not 200
@@ -93,7 +102,7 @@ class App extends Component {
   }
 
   fetchUserFollowers(followers_url) {
-    fetch(followers_url)
+    fetch(followers_url, this.requestHeaders())
       .then(response => {
         return response.json();
       })
@@ -128,7 +137,7 @@ class App extends Component {
   }
 
   fetchUserRepos(repos_url, owner_index) {
-    fetch(repos_url)
+    fetch(repos_url, this.requestHeaders())
       .then(response => {
         return response.json();
       })
