@@ -4,7 +4,7 @@ const Column = (props) => {
   return(
     <tr key={props.id}>
       <td>
-        <img src={props.avatar_url} className="follower-avatar" />
+        <img src={props.avatar_url} className="follower-avatar" alt="follower-avatar" />
         <a hreg="#" onClick={props.onClick} className="black" >
           {props.login}
         </a>
@@ -70,6 +70,7 @@ class GithubInfo extends Component {
                   return (this.renderColumn(index, id, login, avatar_url, null));
                 }
               }
+              return null;
             })
           }
         </tbody>
@@ -86,6 +87,7 @@ class GithubInfo extends Component {
           <img
             src={userInfo.avatar_url}
             className="img-fluid d-block"
+            alt="user-avatar"
           />
         </div>
         <div className="col-md-9">

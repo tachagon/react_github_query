@@ -11,6 +11,7 @@ class App extends Component {
     this.state = {
       usernameInput: '',
       displayUserInfo: false,
+      displayLoader: false,
       errorMessage: '',
       userInfo: {
         login: '',
@@ -40,7 +41,13 @@ class App extends Component {
   handleSubmit(event) {
     // Prevent browser refresh
     event.preventDefault();
+    // Asynchronouse fetch data
     this.fetchUserData(this.state.usernameInput);
+
+    // Synchronouse fetch data
+    // this.fetchData(this.state.usernameInput);
+    
+    // Set input form value to empty
     this.setState({usernameInput: ''});
   }
 
@@ -66,7 +73,95 @@ class App extends Component {
     };
   }
 
+  async myFetch(url, headers={}) {
+    const data = await fetch(url, headers)
+      .then(response => {
+        if (!response.ok) {
+          throw Error(response.statusText);
+        } else {
+          return response.json();
+        }
+      });
+
+    return data;
+  }
+
+// This is synchronouse fetch data from GITHUB API
+  async fetchData(username) {
+    // Define GITHUB API
+    const GITHUB_USERS_API = 'https://api.github.com/users/';
+    const GITHUB_USERS_URL = GITHUB_USERS_API + username;
+
+    // Define request headers
+    const REQUEST_HEADERS = this.requestHeaders();
+
+    // Get current userInfo
+    const userInfo = {...this.state.userInfo};
+
+    // Show loader
+    this.setState({
+      displayLoader: true,
+      displayUserInfo: false,
+      errorMessage: '',
+    });
+
+    try {
+      // Fetch user data according to username
+      // and get data from response
+      const {login, avatar_url, bio, followers_url} = await this.myFetch(GITHUB_USERS_URL, REQUEST_HEADERS);
+
+      userInfo['login'] = login;
+      userInfo['avatar_url'] = avatar_url;
+      userInfo['bio'] = bio;
+      userInfo['followers'] = [];
+
+      // Fet user's followers
+      const followersArray = await this.myFetch(followers_url, REQUEST_HEADERS);
+
+      // Use for loop because forEach loop is not handle with asynchronouse
+      for (let i = 0; i < followersArray.length; i++) {
+        // Get repos url from each follower
+        const {repos_url} = followersArray[i];
+
+        // Set each follower into followers array
+        userInfo['followers'][i] = {...followersArray[i], repos: []};
+
+        // Get repositories for each follower
+        const reposArray = await this.myFetch(repos_url, REQUEST_HEADERS);
+
+        for (var j = 0; j < reposArray.length; j++) {
+          // Set each repository into each follower
+          userInfo['followers'][i]['repos'][j] = {...reposArray[j]};
+        }
+      }
+
+      this.setState({
+        displayLoader: false,
+        displayUserInfo: true,
+        userInfo: userInfo,
+      });
+
+    } catch (error) {
+      this.setState({
+        displayLoader: false,
+        displayUserInfo: false,
+        errorMessage: error.message,
+        userInfo: this.resetUserInfo(),
+      });
+    }
+
+  }
+
+// This is asynchronouse fetch data from GITHUB API
   fetchUserData(username) {
+
+    // Show loader
+    this.setState({
+      displayLoader: true,
+      displayUserInfo: false,
+      errorMessage: '',
+    });
+
     fetch('https://api.github.com/users/' + username, this.requestHeaders())
       .then(response => {
         if (!response.ok) {
@@ -80,12 +175,13 @@ class App extends Component {
       .then(responseJson => {
 
         // Get datas that we need from JSON response.
-        const {id, login, avatar_url, bio, followers, followers_url} = responseJson;
+        const {login, avatar_url, bio, followers, followers_url} = responseJson;
         
         // Create empty array for stores followers
         const followersArr = Array(followers).fill(null);
 
         this.setState({
+          displayLoader: false,
           displayUserInfo: true,
           userInfo: this.resetUserInfo(login, avatar_url, bio, followersArr),
         });
@@ -96,6 +192,7 @@ class App extends Component {
       })
       .catch(error => {
         this.setState({
+          displayLoader: false,
           displayUserInfo: false,
           errorMessage: error.message,
           userInfo: this.resetUserInfo(),
@@ -199,6 +296,16 @@ class App extends Component {
             onSubmit={event => this.handleSubmit(event)} 
           />
         </div>
+
+        {this.state.displayLoader &&
+          <div className="row">
+            <div className="col"></div>
+            <div className="col text-center">
+              <h3>Loading...</h3>
+            </div>
+            <div className="col"></div>
+          </div>
+        }
         
         {this.state.displayUserInfo ? 
           <GithubInfo 
