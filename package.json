@@ -4,6 +4,7 @@
   "private": true,
   "homepage": "https://tachagon.github.io/react_github_query",
   "dependencies": {
+    "crypto-js": "^3.1.9-1",
     "gh-pages": "^1.2.0",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",

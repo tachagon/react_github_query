@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import CryptoJS from 'crypto-js';
+
 import InputBar from './InputBar';
 import GithubInfo from './GithubInfo';
 
@@ -59,7 +61,7 @@ class App extends Component {
     return {
       method: "GET",
       headers: {
-        "Authorization": "token " + process.env.REACT_APP_FIFA_ROMIO,
+        "Authorization": "token " + decrypt(process.env.REACT_APP_CIPHER_TOKEN, process.env.REACT_APP_PHRASE),
       },
     };
   }
@@ -220,3 +222,9 @@ class App extends Component {
 }
 
 export default App;
+
+function decrypt(ciphertext, secret) {
+  const bytes = CryptoJS.AES.decrypt(ciphertext.toString(), secret);
+  const plaintext = bytes.toString(CryptoJS.enc.Utf8);
+  return plaintext;
+}
