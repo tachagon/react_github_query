@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 
-const Column = (props) => {
+const Row = (props) => {
   return(
     <tr key={props.id}>
       <td>
@@ -24,9 +24,9 @@ const Column = (props) => {
 
 class GithubInfo extends Component {
 
-  renderColumn(follower_index, id, login, avatar_url, name) {
+  renderRow(follower_index, id, login, avatar_url, name) {
     return (
-      <Column 
+      <Row 
         onClick={() => this.props.onClick(follower_index)}
         key={id}
         login={login}
@@ -62,12 +62,12 @@ class GithubInfo extends Component {
                   // | username2 | repository4 |
                   return repos.map((repo) => {
                     const {id, name} = repo;
-                    return (this.renderColumn(index, id, login, avatar_url, name));
+                    return (this.renderRow(index, id, login, avatar_url, name));
                   });
                 } else {
                   // Return table's row in this manner
                   // | username3 | No repo. |
-                  return (this.renderColumn(index, id, login, avatar_url, null));
+                  return (this.renderRow(index, id, login, avatar_url, null));
                 }
               }
               return null;
