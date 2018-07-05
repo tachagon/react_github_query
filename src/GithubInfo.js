@@ -79,7 +79,7 @@ class GithubInfo extends Component {
   }
 
   render() {
-    const {userInfo} = this.props;
+    const {userInfo, displayFollowersLoader} = this.props;
 
     return (
       <div className="row">
@@ -95,14 +95,21 @@ class GithubInfo extends Component {
           <p className="lead">Bio:</p>
           <p>{userInfo.bio}</p>
 
-          {(!userInfo.followers || userInfo.followers.length === 0) ?
+          {displayFollowersLoader ?
             <div className="row">
               <div className="col">
-                <p className="lead">No follower.</p>
+                <p className="lead">Followers Loading...</p>
               </div>
             </div>
             :
-            this.renderTable(userInfo.followers)
+            (!userInfo.followers || userInfo.followers.length === 0) ?
+              <div className="row">
+                <div className="col">
+                  <p className="lead">No follower.</p>
+                </div>
+              </div>
+              :
+              this.renderTable(userInfo.followers)
           }
 
         </div>

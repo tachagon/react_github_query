@@ -12,6 +12,7 @@ class App extends Component {
       usernameInput: '',
       displayUserInfo: false,
       displayLoader: false,
+      displayFollowersLoader: false,
       errorMessage: '',
       userInfo: {
         login: '',
@@ -41,6 +42,7 @@ class App extends Component {
   handleSubmit(event) {
     // Prevent browser refresh
     event.preventDefault();
+
     // Asynchronouse fetch data
     this.fetchUserData(this.state.usernameInput);
 
@@ -59,7 +61,12 @@ class App extends Component {
     if (follower) {
       // Get login(username) data of follower
       const {login} = follower;
+
+      // Asynchronouse fetch data
       return this.fetchUserData(login);
+
+      // Synchronouse fetch data
+      // return this.fetchData(login);
     }
     return null;
   }
@@ -115,35 +122,48 @@ class App extends Component {
       userInfo['bio'] = bio;
       userInfo['followers'] = [];
 
+      // Set state for display user informaiton
+      this.setState({
+        displayLoader: false,
+        displayFollowersLoader: true,
+        displayUserInfo: true,
+        userInfo: userInfo,
+      });
+
       // Fet user's followers
       const followersArray = await this.myFetch(followers_url, REQUEST_HEADERS);
 
       // Use for loop because forEach loop is not handle with asynchronouse
       for (let i = 0; i < followersArray.length; i++) {
+
         // Get repos url from each follower
         const {repos_url} = followersArray[i];
-
-        // Set each follower into followers array
-        userInfo['followers'][i] = {...followersArray[i], repos: []};
 
         // Get repositories for each follower
         const reposArray = await this.myFetch(repos_url, REQUEST_HEADERS);
 
-        for (var j = 0; j < reposArray.length; j++) {
-          // Set each repository into each follower
-          userInfo['followers'][i]['repos'][j] = {...reposArray[j]};
-        }
+        // Set repos array for each follower
+        followersArray[i]['repos'] = reposArray;
+
+        // Set each follower into followers array
+        userInfo['followers'][i] = {...followersArray[i]};
+
+        // Set state for display each follower
+        this.setState({
+          displayFollowersLoader: false,
+          userInfo: userInfo,
+        });
       }
 
+      // Set state in case of user have no follower
       this.setState({
-        displayLoader: false,
-        displayUserInfo: true,
-        userInfo: userInfo,
+        displayFollowersLoader: false,
       });
 
     } catch (error) {
       this.setState({
         displayLoader: false,
+        displayFollowersLoader: false,
         displayUserInfo: false,
         errorMessage: error.message,
         userInfo: this.resetUserInfo(),
@@ -182,6 +202,7 @@ class App extends Component {
 
         this.setState({
           displayLoader: false,
+          displayFollowersLoader: true,
           displayUserInfo: true,
           userInfo: this.resetUserInfo(login, avatar_url, bio, followersArr),
         });
@@ -193,6 +214,7 @@ class App extends Component {
       .catch(error => {
         this.setState({
           displayLoader: false,
+          displayFollowersLoader: false,
           displayUserInfo: false,
           errorMessage: error.message,
           userInfo: this.resetUserInfo(),
@@ -224,8 +246,9 @@ class App extends Component {
           // Get user's repos.
           this.fetchUserRepos(repos_url, index);
         });
-        
+
         this.setState({
+          displayFollowersLoader: false,
           userInfo: {
             ...this.state.userInfo,
             followers: followersArr,
@@ -311,6 +334,7 @@ class App extends Component {
           <GithubInfo 
             userInfo={this.state.userInfo}
             onClick={follower_index => this.handleClick(follower_index)} 
+            displayFollowersLoader={this.state.displayFollowersLoader}
           />
           :
           this.state.errorMessage &&
